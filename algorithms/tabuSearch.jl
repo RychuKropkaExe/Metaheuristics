@@ -1,19 +1,6 @@
 include("../utils/all.jl")
 using TimesDates
 using Dates
-function findChange(arr1::Array, arr2::Array)
-    len = length(arr1)
-    for i in 1:len
-        if arr1[i] != arr2[i]
-            first = i
-            for j in 0:len
-                if arr1[len-j] != arr2[len-j]
-                    return[first,len-j]
-                end
-            end
-        end
-    end
-end
 function tabuSearch(cities::Array{Int}, graph::Matrix, time::Int, len::Int)::Array{Int}
     size::Int = cities |> length
     longTermMemory = []
