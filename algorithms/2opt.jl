@@ -9,7 +9,7 @@ function swap(tour::Array{Int}, i::Int, j::Int)::Array{Int}
     return tour
 end
 
-function twoopt(cities::Array{Int}, graph::Matrix, nodes::Array{Int}, plot::Bool)::Array{Int}
+function twoopt(cities::Array{Int}, graph::Matrix, nodes::Matrix, plot::Bool)::Array{Int}
     newTour = []
     size = cities |> length
     bestDist = destination(graph, cities)

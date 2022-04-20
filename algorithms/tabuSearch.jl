@@ -14,32 +14,45 @@ function tabuSearch(cities::Array{Int}, graph::Matrix, time::Int, len::Int)::Arr
     start = Dates.now()
     time_elapsed = Second(0)
 
+    UPGRADE_TIME = Second(20)
+    upgrade_start = Dates.now()
+    upgrade_time_elapsed = Second(0)
+
     globalCities::Array{Int} = copy(cities)
     while (true)
         localCities::Array{Int} = globalCities
         localDist::Float64 = Inf
         move::Array{Int} = [-1, -1]
-        for i = 1:size-1
-            for j = i+1:size
-                if (time_elapsed > TIME_LIMIT)
-                    return cities
-                end
-                if [i, j] ∈ tabuList || [j, i] ∈ tabuList
-                    continue
-                end
+        for i = 1:size-1, j = i+1:size
 
-                currCities::Array{Int} = copy(localCities)
-                part = view(currCities, i:j)
-                reverse!(part)
+            if time_elapsed > TIME_LIMIT
+                return cities
+            end
 
-                currDist::Float64 = destination(graph, currCities)
-                time_elapsed = Dates.now() - start
+            if upgrade_time_elapsed > UPGRADE_TIME
+                upgrade_time_elapsed = Second(0)
+                upgrade_start = Dates.now()
+                shuffle!(globalCities)
+                println("UPGRADING")
+                break
+            end
 
-                if currDist < localDist
-                    localCities = currCities
-                    localDist = currDist
-                    move = [i, j]
-                end
+            if [i, j] ∈ tabuList || [j, i] ∈ tabuList
+                continue
+            end
+
+            currCities::Array{Int} = copy(localCities)
+            part = view(currCities, i:j)
+            reverse!(part)
+
+            currDist::Float64 = destination(graph, currCities)
+            time_elapsed = Dates.now() - start
+            upgrade_time_elapsed = Dates.now() - upgrade_start
+
+            if currDist < localDist
+                localCities = currCities
+                localDist = currDist
+                move = [i, j]
             end
         end
         if localDist < bestDist
@@ -47,6 +60,8 @@ function tabuSearch(cities::Array{Int}, graph::Matrix, time::Int, len::Int)::Arr
             bestCities = localCities
             println("New best distance: ", bestDist)
             #sleep(1)
+            upgrade_time_elapsed = Second(0)
+            upgrade_start = Dates.now()
         end
         globalCities = localCities
         if move != [-1, -1]
