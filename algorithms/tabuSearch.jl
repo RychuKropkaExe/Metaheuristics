@@ -8,7 +8,7 @@ function tabuSearch(cities::Array{Int}, graph::Matrix, time::Int, len::Int)::Arr
     bestCities::Array{Int} = cities
     bestDist::Float64 = destination(graph, cities)
 
-    tabuList::Array{Vector{Int}} = [[0, 0] for _ ∈ 1:len]
+    tabuList::Array{Vector{Int}} = [[-1, -1] for _ ∈ 1:len]
 
     TIME_LIMIT = Second(time)
     start = Dates.now()
@@ -18,14 +18,15 @@ function tabuSearch(cities::Array{Int}, graph::Matrix, time::Int, len::Int)::Arr
     while (true)
         localCities::Array{Int} = globalCities
         localDist::Float64 = Inf
+        move::Array{Int} = [-1, -1]
         for i = 1:size-1
             for j = i+1:size
                 if (time_elapsed > TIME_LIMIT)
                     return cities
                 end
-                if [i, j] ∈ tabuList
+                if [i, j] ∈ tabuList || [j, i] ∈ tabuList
                     continue
-                end                
+                end
 
                 currCities::Array{Int} = copy(localCities)
                 part = view(currCities, i:j)
@@ -37,9 +38,7 @@ function tabuSearch(cities::Array{Int}, graph::Matrix, time::Int, len::Int)::Arr
                 if currDist < localDist
                     localCities = currCities
                     localDist = currDist
-
-                    popfirst!(tabuList)
-                    push!(tabuList, [i, j])
+                    move = [i, j]
                 end
             end
         end
@@ -50,6 +49,10 @@ function tabuSearch(cities::Array{Int}, graph::Matrix, time::Int, len::Int)::Arr
             #sleep(1)
         end
         globalCities = localCities
+        if move != [-1, -1]
+            popfirst!(tabuList)
+            push!(tabuList, move)
+        end
         #println("Best distance: ", globalDistance, "Total Best: ", bestDist)
     end
     return bestCities
