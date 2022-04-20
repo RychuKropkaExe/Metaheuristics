@@ -31,7 +31,7 @@ function twoopt(cities::Array{Int}, graph::Matrix, nodes::Array{Int}, plot::Bool
     return cities
 end
 
-function twooptacc(cities::Array{Int}, graph::Matrix, nodes::Array{Int}, plot::Bool)::Array{Int}
+function twooptacc(cities::Array{Int}, graph::Matrix, nodes::Matrix, plot::Bool)::Array{Int}
     newTour = []
     size = cities |> length
     @label start_again

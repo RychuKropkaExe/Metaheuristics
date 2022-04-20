@@ -1,7 +1,7 @@
 using Random
 include("../utils/all.jl")
 
-function kRandomPlot(weights::Matrix, dimension::Int, nodes::Array{Int}, k::Int, plot::Bool)
+function kRandomPlot(weights::Matrix, dimension::Int, nodes::Matrix, k::Int, plot::Bool)
     bestDist = Inf
     bestRoad = []
     road = Array(1:dimension)

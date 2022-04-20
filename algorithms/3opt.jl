@@ -1,6 +1,6 @@
 include("../utils/all.jl")
 
-function three_opt_acc(graph::Matrix, road::Array{Int}, nodes::Array{Int}, plot::Bool)::Array{Int}
+function three_opt_acc(graph::Matrix, road::Array{Int}, nodes::Matrix, plot::Bool)::Array{Int}
     best_road = copy(road)
     prev_best = copy(road)
     dimension = length(road)
