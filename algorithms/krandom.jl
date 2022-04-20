@@ -1,6 +1,5 @@
 using Random
-include("../utils/destination.jl")
-include("../utils/plots/repl-plot.jl")
+include("../utils/all.jl")
 
 function kRandomPlot(weights::Matrix, dimension::Int, nodes::Array{Int}, k::Int, plot::Bool)
     bestDist = Inf
