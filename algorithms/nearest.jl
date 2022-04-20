@@ -3,7 +3,7 @@ include("../utils/all.jl")
 
 function nearest(graph, startCity, dimension, nodes, plot)
     cities = Array(1:dimension)
-    result = []
+    result::Array{Int} = []
     currentCity = splice!(cities, startCity)
     closestCity = first(cities)
     push!(result, currentCity)

@@ -26,19 +26,23 @@ function tabuSearch(cities::Array{Int}, graph::Matrix, time::Int, len::Int)::Arr
                 if (time_elapsed > TIME_LIMIT)
                     return cities
                 end
-                newTour = copy(currCities)
+                if [i, j] ∈ tabuList
+                    continue
+                end                
+
+                newTour = [currCities...]
                 part = view(newTour, i:j)
                 reverse!(part)
 
                 newDist::Float64 = destination(graph, newTour)
                 time_elapsed = Dates.now() - start
 
-                if newDist < currBestDist && !([i, j] ∈ tabuList)
+                if newDist < currBestDist
                     if newDist < bestDist
                         bestDist = newDist
                         cities = newTour
                         println("New best distance: ", bestDist)
-                        sleep(1)
+                        #sleep(1)
                     end
                     currCities = newTour
                     currBestDist = newDist
@@ -50,7 +54,7 @@ function tabuSearch(cities::Array{Int}, graph::Matrix, time::Int, len::Int)::Arr
         end
         whileCities = currCities
         whileDistance = currBestDist
-        println("Best distance: ", whileDistance, "Total Best: ", bestDist)
+        #println("Best distance: ", whileDistance, "Total Best: ", bestDist)
     end
     return cities
 end
