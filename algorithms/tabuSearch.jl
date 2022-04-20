@@ -30,7 +30,7 @@ function tabuSearch(cities::Array{Int}, graph::Matrix, time::Int, len::Int)::Arr
                     continue
                 end                
 
-                newTour = [currCities...]
+                newTour = copy(currCities)
                 part = view(newTour, i:j)
                 reverse!(part)
 
