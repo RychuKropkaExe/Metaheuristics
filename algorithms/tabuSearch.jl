@@ -3,24 +3,21 @@ using TimesDates
 using Dates
 
 function tabuSearch(cities::Array{Int}, graph::Matrix, time::Int, len::Int)::Array{Int}
+    size::Int = cities |> length
+
+    bestCities::Array{Int} = cities
     bestDist::Float64 = destination(graph, cities)
 
     tabuList::Array{Vector{Int}} = [[0, 0] for _ ∈ 1:len]
-
-
-    size::Int = cities |> length
 
     TIME_LIMIT = Second(time)
     start = Dates.now()
     time_elapsed = Second(0)
 
-
-    whileCities::Array{Int} = copy(cities)
-    whileDistance::Float64 = bestDist
+    globalCities::Array{Int} = copy(cities)
     while (true)
-        newTour::Array{Int} = []
-        currCities::Array{Int} = whileCities
-        currBestDist::Float64 = Inf
+        localCities::Array{Int} = globalCities
+        localDist::Float64 = Inf
         for i = 1:size-1
             for j = i+1:size
                 if (time_elapsed > TIME_LIMIT)
@@ -30,31 +27,30 @@ function tabuSearch(cities::Array{Int}, graph::Matrix, time::Int, len::Int)::Arr
                     continue
                 end                
 
-                newTour = copy(currCities)
-                part = view(newTour, i:j)
+                currCities::Array{Int} = copy(localCities)
+                part = view(currCities, i:j)
                 reverse!(part)
 
-                newDist::Float64 = destination(graph, newTour)
+                currDist::Float64 = destination(graph, currCities)
                 time_elapsed = Dates.now() - start
 
-                if newDist < currBestDist
-                    if newDist < bestDist
-                        bestDist = newDist
-                        cities = newTour
-                        println("New best distance: ", bestDist)
-                        #sleep(1)
-                    end
-                    currCities = newTour
-                    currBestDist = newDist
+                if currDist < localDist
+                    localCities = currCities
+                    localDist = currDist
 
                     popfirst!(tabuList)
                     push!(tabuList, [i, j])
                 end
             end
         end
-        whileCities = currCities
-        whileDistance = currBestDist
-        #println("Best distance: ", whileDistance, "Total Best: ", bestDist)
+        if localDist < bestDist
+            bestDist = localDist
+            bestCities = localCities
+            println("New best distance: ", bestDist)
+            #sleep(1)
+        end
+        globalCities = localCities
+        #println("Best distance: ", globalDistance, "Total Best: ", bestDist)
     end
-    return cities
+    return bestCities
 end
