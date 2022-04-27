@@ -31,10 +31,11 @@ function tabuSearch(cities::Array{Int}, graph::Matrix, time::Int, len::Int)::Arr
                     shuffle!(globalCities)
                     println("UPGRADING")
                 else
-                    kick = rand(1:length(longTermMemory))   
-                    globalCities = longTermMemory[kick][1]
-                    tabuList = longTermMemory[kick][2]
-                    localCities = longTermMemory[kick][1]
+                    #kick = rand(1:length(longTermMemory))
+                    kick = pop!(longTermMemory) 
+                    globalCities = kick[1]
+                    tabuList = kick[2]
+                    localCities = kick[1]
                     println(tabuList)
                     println("KICKING")
                     sleep(5)

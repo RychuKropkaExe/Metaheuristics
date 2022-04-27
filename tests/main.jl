@@ -10,13 +10,14 @@ function xd()
 end
 
 function main()
-    dict = structToDict(readTSPLIB(:berlin52))
+    dict = structToDict(readTSPLIB(:bier127))
     dimension = dict[:dimension]
     weights = dict[:weights]
     nodes = dict[:nodes]
     println(dict[:optimal])
 
-    list = tabuSearch(kRandom(weights, dimension, 1), weights,300,10)
+    #list = tabuSearch(twooptacc(kRandom(weights,dimension,1000),weights,nodes, false), weights,300,floor(Int,sqrt(dimension)))
+    list = tabuSearch(kRandom(weights,dimension,1000),weights,300,floor(Int,sqrt(dimension)))
     destination(weights, list) |> println
     # destination(weights, list) |> println
     # sleep(3)
