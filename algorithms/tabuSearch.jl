@@ -5,7 +5,8 @@ function tabuSearch(
     cities::Array{Int},
     graph::Matrix,
     time::Int,
-    len::Int,
+    tabuLen::Int,
+    longTimeLen::Int,
     iterStop::Bool,
     iterNumber::Int
 )::Array{Int}
@@ -15,7 +16,7 @@ function tabuSearch(
     longTermMemory = []
     bestCities::Array{Int} = cities
     bestDist::Float64 = destination(graph, cities)
-    tabuList::Array{Vector{Int}} = [[-1, -1] for _ ∈ 1:len]
+    tabuList::Array{Vector{Int}} = [[-1, -1] for _ ∈ 1:tabuLen]
     TIME_LIMIT = Second(time)
     start = Dates.now()
     time_elapsed = Second(0)
@@ -77,7 +78,7 @@ function tabuSearch(
             bestDist = localDist
             bestCities = localCities
             savedTabu = copy(tabuList)
-            if length(longTermMemory) == 10
+            if length(longTermMemory) == longTimeLen
                 popfirst!(longTermMemory)
             end
             popfirst!(savedTabu)
