@@ -30,8 +30,6 @@ function tabuSearch(
         localDist::Float64 = Inf
         move::Array{Int} = [-1, -1]
         for i = 1:size-1, j = i+1:size
-            iterations += 1
-
             if time_elapsed > TIME_LIMIT || (iterStop && iterations > iterNumber)
                 return bestCities
             end
