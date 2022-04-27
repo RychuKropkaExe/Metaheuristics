@@ -17,8 +17,8 @@ function main()
     println(dict[:optimal])
 
     #list = tabuSearch(twooptacc(kRandom(weights,dimension,1000),weights,nodes, false), weights,300,floor(Int,sqrt(dimension)))
-    list = tabuSearch(kRandom(weights,dimension,1000),weights,300,floor(Int,sqrt(dimension)))
-    destination(weights, list) |> println
+    list = tabuSearch( kRandom(weights, dimension, 1000), weights, 300, floor(Int, sqrt(dimension)), true, 10000000)
+    println(destination(weights, list))
     # destination(weights, list) |> println
     # sleep(3)
     # #list::Array{Int} = nearestforall(weights, dimension, nodes, false)

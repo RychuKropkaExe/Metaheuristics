@@ -1,7 +1,16 @@
 include("../utils/all.jl")
 using TimesDates
 using Dates
-function tabuSearch(cities::Array{Int}, graph::Matrix, time::Int, len::Int)::Array{Int}
+function tabuSearch(
+    cities::Array{Int},
+    graph::Matrix,
+    time::Int,
+    len::Int,
+    iterStop::Bool,
+    iterNumber::Int
+)::Array{Int}
+
+    iterations::Int = 0
     size::Int = cities |> length
     longTermMemory = []
     bestCities::Array{Int} = cities
@@ -15,13 +24,15 @@ function tabuSearch(cities::Array{Int}, graph::Matrix, time::Int, len::Int)::Arr
     upgrade_time_elapsed = Second(0)
     globalCities::Array{Int} = copy(cities)
     while (true)
+        iterations += 1
         localCities::Array{Int} = globalCities
         localDist::Float64 = Inf
         move::Array{Int} = [-1, -1]
         for i = 1:size-1, j = i+1:size
+            iterations += 1
 
-            if time_elapsed > TIME_LIMIT
-                return cities
+            if time_elapsed > TIME_LIMIT || (iterStop && iterations > iterNumber)
+                return bestCities
             end
 
             if upgrade_time_elapsed > UPGRADE_TIME
@@ -32,7 +43,7 @@ function tabuSearch(cities::Array{Int}, graph::Matrix, time::Int, len::Int)::Arr
                     println("UPGRADING")
                 else
                     #kick = rand(1:length(longTermMemory))
-                    kick = pop!(longTermMemory) 
+                    kick = pop!(longTermMemory)
                     globalCities = kick[1]
                     tabuList = kick[2]
                     localCities = kick[1]
@@ -61,6 +72,7 @@ function tabuSearch(cities::Array{Int}, graph::Matrix, time::Int, len::Int)::Arr
                 move = [i, j]
             end
         end
+        globalCities = localCities
         if localDist < bestDist
             bestDist = localDist
             bestCities = localCities
@@ -70,12 +82,11 @@ function tabuSearch(cities::Array{Int}, graph::Matrix, time::Int, len::Int)::Arr
             end
             popfirst!(savedTabu)
             push!(savedTabu, move)
-            push!(longTermMemory, [globalCities,savedTabu])
+            push!(longTermMemory, [globalCities, savedTabu])
             println("New best distance: ", bestDist)
             upgrade_time_elapsed = Second(0)
             upgrade_start = Dates.now()
         end
-        globalCities = localCities
         if move != [-1, -1]
             popfirst!(tabuList)
             push!(tabuList, move)
