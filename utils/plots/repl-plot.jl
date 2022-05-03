@@ -1,6 +1,6 @@
 using Plots
 
-function myplot(road::Array{Int}, nodes::Array{Int}, connect::Bool)
+function myplot(road::Array{Int}, nodes::Matrix, connect::Bool)
     plt = scatter(nodes[:, 1], nodes[:, 2], label=false)
     xaxis = []
     road .|> (x -> push!(xaxis, nodes[x, 1]))
