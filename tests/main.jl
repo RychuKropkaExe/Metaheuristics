@@ -30,7 +30,8 @@ function main()
     #list = tabuThreads(weights, dimension)
     #list = tabuSearch(kRandom(weights, dimension, 1000), weights, 3000, floor(Int, sqrt(dimension)), 10, false, 4000)
     list = kRandom(weights,dimension,1000)
-    list = twooptacc(list,weights,nodes,true);
+    #list = twooptacc(list,weights,nodes,true);
+    tabuSearch(list,weights,500,7,10,dimension,0.02,false)
     #destination(weights, list) |> println
     # sleep(3)
     # #list::Array{Int} = nearestforall(weights, dimension, nodes, false)
