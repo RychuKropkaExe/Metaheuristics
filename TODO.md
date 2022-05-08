@@ -1,0 +1,8 @@
+1. Co najmniej 2 otoczenia [ ]
+2. Łącznie 10 wariantów [ ]
+3. Akceleracja co najmniej jednego otoczenia [ ]
+4. Jakaś metoda eksploracji [ ]
+5. Różny budżet obliczeniowy. Sprawdzić, czy nie występuje przypadkiem przekłamanie, wynikające ze zbyt małego lub zbyt dużego budżetu obliczeniowego(Wykres gwałtownie spada, ale później się wygładza, gdzie drugi spada cały czas z taką samą "prędkością") [ ]
+6. Urównoleglenie(Przypadkiem się to zrobi) [ ]
+7. Testy statystyczne(Wilcockson) [ ]
+8. Skorzystanie z parameter tunera [ ]
