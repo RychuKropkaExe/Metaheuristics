@@ -5,4 +5,4 @@
 5. Różny budżet obliczeniowy. Sprawdzić, czy nie występuje przypadkiem przekłamanie, wynikające ze zbyt małego lub zbyt dużego budżetu obliczeniowego(Wykres gwałtownie spada, ale później się wygładza, gdzie drugi spada cały czas z taką samą "prędkością") [ ]
 6. Urównoleglenie(Przypadkiem się to zrobi) [ ]
 7. Testy statystyczne(Wilcockson) [ ]
-8. Skorzystanie z parameter tunera [ ]
+8. Skorzystanie z parameter tunera [V]
