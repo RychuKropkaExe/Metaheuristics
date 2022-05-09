@@ -1,4 +1,5 @@
 include("../algorithms/all.jl")
+include("../utils/all.jl")
 using TSPLIB
 using Hyperopt
 using Plots
@@ -9,8 +10,10 @@ function tuning()
     arry = []
     for (root, dirs, files) in walkdir("./plikiTSP")
         for file in files
-            path = "./plikiTSP/"*file
-            dict = struct_to_dict(readTSP(path))
+            println(pwd())
+            println(file)
+            path = root*"/"*file
+            dict = structToDict(readTSP(path))
             graph = dict[:weights]
             dimension = dict[:dimension]
             dict = struct_to_dict(readTSP(file))
