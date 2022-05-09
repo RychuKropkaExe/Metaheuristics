@@ -1,6 +1,53 @@
 include("../utils/all.jl")
 using TimesDates
 using Dates
+
+function reverse_variant(cities::Array, i::Int, j::Int)
+    a = view(cities,i:j)
+    reverse!(a)
+end
+function swap_variant(cities::Array,i::Int,j::Int)
+    cities[i], cities[j] = cities[j], cities[i]
+end
+
+
+function reverse_variant_destination(graph::Matrix, dimension::Int, cities::Array, i::Int, j::Int, curr_distance::Float64)
+    tested_distance = curr_distance
+    if i > j
+        i, j = j, i
+    end
+    if curr_distance == Inf
+        return destination(graph,cities)
+    end
+    firstDist::Float64 = 0.0
+    newDist::Float64 = 0.0
+    if i == j
+        return curr_distance
+    elseif i > 1 && j < dimension
+        firstDist = graph[cities[i-1],cities[j]] + graph[cities[j+1],cities[i]]
+        newDist = graph[cities[i-1],cities[i]] + graph[cities[j],cities[j+1]]
+        tested_distance -= firstDist
+        tested_distance += newDist
+        return tested_distance
+    elseif i == 1 && j < dimension
+        firstDist = graph[cities[j],cities[dimension]] + graph[cities[i],cities[j+1]]
+        newDist = graph[cities[i],cities[dimension]] + graph[cities[j],cities[j+1]]
+        tested_distance -= firstDist
+        tested_distance += newDist
+        return tested_distance
+    elseif i > 1 && j == dimension
+        firstDist = graph[cities[i],cities[1]] + graph[cities[j],cities[i-1]]
+        newDist = graph[cities[i],cities[i-1]] + graph[cities[j],cities[1]]
+        tested_distance -= firstDist
+        tested_distance += newDist
+        return tested_distance
+    elseif i == 1 && j == dimension
+        return curr_distance
+    end  
+end
+function swap_variant_destination(graph::Matrix, currCities::Array, i::Int, j::Int)
+    
+end
 function tabuSearch(
     cities::Array{Int},
     graph::Matrix,
@@ -8,9 +55,10 @@ function tabuSearch(
     tabuLen::Int,
     longTimeLen::Int,
     iterStop::Bool,
-    iterNumber::Int
+    iterNumber::Int,
+    neighbourhood_search::Function
 )::Array{Int}
-
+    dimension = length(cities)
     iterations::Int = 0
     size::Int = cities |> length
     longTermMemory = []
@@ -58,13 +106,12 @@ function tabuSearch(
             end
 
             currCities::Array{Int} = copy(localCities)
-            part = view(currCities, i:j)
-            reverse!(part)
+            neighbourhood_search(currCities, i, j)
+            currDist::Float64 = reverse_variant_destination(graph,dimension,currCities,i,j,localDist)
 
-            currDist::Float64 = destination(graph, currCities)
+
             time_elapsed = Dates.now() - start
             upgrade_time_elapsed = Dates.now() - upgrade_start
-
             if currDist < localDist
                 localCities = currCities
                 localDist = currDist
