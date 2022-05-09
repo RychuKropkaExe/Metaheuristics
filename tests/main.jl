@@ -17,7 +17,7 @@ function main()
     println(dict[:optimal])
 
     #list = tabuSearch(twooptacc(kRandom(weights,dimension,1000),weights,nodes, false), weights,300,floor(Int,sqrt(dimension)))
-    list = tabuSearch(kRandom(weights, dimension, 1000), weights, 300, floor(Int, sqrt(dimension)), 10, false, 4000, reverse_variant)
+    list = tabuSearch(kRandom(weights, dimension, 1000), weights, 300, floor(Int, sqrt(dimension)), 10, false, 4000, swap_variant, swap_variant_destination)
     println(destination(weights, list))
     # destination(weights, list) |> println
     # sleep(3)

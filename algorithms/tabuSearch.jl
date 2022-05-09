@@ -1,7 +1,6 @@
 include("../utils/all.jl")
 using TimesDates
 using Dates
-
 function reverse_variant(cities::Array, i::Int, j::Int)
     a = view(cities,i:j)
     reverse!(a)
@@ -45,8 +44,30 @@ function reverse_variant_destination(graph::Matrix, dimension::Int, cities::Arra
         return curr_distance
     end  
 end
-function swap_variant_destination(graph::Matrix, currCities::Array, i::Int, j::Int)
-    
+function swap_variant_destination(graph::Matrix, dimension::Int, cities::Array, i::Int, j::Int, curr_distance::Float64)
+    if curr_distance == Inf
+        return destination(graph,cities)
+    end
+    tested_distance = curr_distance
+    if i > j 
+        i, j = j, i
+    end
+    if i == j
+        return curr_distance
+    end
+    i_next = i
+    i_prev = i == 1 ? dimension : i - 1
+    j_next = j == dimension ? 1 : j + 1
+    j_prev = j - 1
+    sum1 = graph[cities[j], cities[i_next]] + graph[cities[i], cities[j_prev]] + graph[cities[j], cities[i_prev]] + graph[cities[i], cities[j_next]]
+    sum2 = graph[cities[i], cities[i_next]] + graph[cities[i], cities[i_prev]] + graph[cities[j], cities[j_next]] + graph[cities[j], cities[j_prev]]
+    #println(curr_distance, ":",sum1, ":",sum2)
+    if sum1 > sum2
+            return destination(graph,cities)
+    else
+            return tested_distance
+    end
+    #return tested_distance - (sum1 - sum2)
 end
 function tabuSearch(
     cities::Array{Int},
@@ -56,7 +77,8 @@ function tabuSearch(
     longTimeLen::Int,
     iterStop::Bool,
     iterNumber::Int,
-    neighbourhood_search::Function
+    neighbourhood_search::Function,
+    neighbourhood_search_destination::Function
 )::Array{Int}
     dimension = length(cities)
     iterations::Int = 0
@@ -107,8 +129,7 @@ function tabuSearch(
 
             currCities::Array{Int} = copy(localCities)
             neighbourhood_search(currCities, i, j)
-            currDist::Float64 = reverse_variant_destination(graph,dimension,currCities,i,j,localDist)
-
+            currDist::Float64 = neighbourhood_search_destination(graph,dimension,currCities,i,j,localDist)
 
             time_elapsed = Dates.now() - start
             upgrade_time_elapsed = Dates.now() - upgrade_start
