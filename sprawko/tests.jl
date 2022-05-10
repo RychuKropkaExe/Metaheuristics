@@ -7,6 +7,7 @@ using Plots
 function tuning()
     arrx = []
     arry = []
+    arry2 = []
     for (root, dirs, files) in walkdir("./sprawko/plikiTSP")
         for file in files
             path = "./sprawko/plikiTSP/"*file
@@ -14,20 +15,18 @@ function tuning()
             graph = dict[:weights]
             dimension = dict[:dimension]
             base = kRandom(graph,dimension,1)
-            arr = Array{Int,1}(1:floor(Int,log(dimension)))
-            arr2::Array{Int,1} = [floor(Int,sqrt(dimension)),floor(Int,dimension/2),dimension, 2*dimension]
+            arr = Array{Int,1}(1:floor(Int,sqrt(dimension)))
+            arr2 = Array{Int,1}(1:floor(Int,sqrt(dimension)):dimension)
             append!(arr,arr2)
-            barr = Array{Int,1}(1:floor(log(dimension)))
-            ho = @phyperopt for i = 100, a = arr, b = barr
+            barr = Array{Int,1}(1:floor(Int,sqrt(dimension)))
+            ho = @phyperopt for i = floor(Int,sqrt(dimension)), a = arr, b = barr
                 cost = destination(graph,tabuSearch(base,graph,30,a,b,false,1,reverse_variant,reverse_variant_destination))
             end
-            println(ho.minimizer, ":",ho.minimum, ":", ho.maximizer, ":", ho.maximum)
+            #println(ho.minimizer, ":",ho.minimum, ":", ho.maximizer, ":", ho.maximum)
             push!(arrx,file)
-            push!(arry, ho.minimizer[1])
+            push!(arry2,ho.minimum)
+            push!(arry, ho.minimizer)
             i+=1
-            println(arrx)
-            println(arry)
-            exit(0)
         end
     end
     println(arrx)
