@@ -124,7 +124,9 @@ function tabuSearch(
             end
 
             if [i, j] ∈ tabuList || [j, i] ∈ tabuList
-                continue
+                if (currDist >= bestDist)
+                    continue
+                end
             end
 
             currCities::Array{Int} = copy(localCities)
