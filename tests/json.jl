@@ -118,7 +118,7 @@ end
 
 function test_json()
     results = Dict()
-    problems = ["a280.tsp", "bier127.tsp", "burma14.tsp", "ch150.tsp", "d493.tsp", "d657.tsp", "eil101.tsp", "eil51.tsp", "eil76.tsp", "fl417.tsp"]
+    problems = ["a280.tsp", "bier127.tsp", "u1432.tsp", "ch150.tsp", "u1817.tsp", "rl1323.tsp", "eil101.tsp", "eil51.tsp", "eil76.tsp", "fl417.tsp"]
 
     for i in problems
         results[i] = []
@@ -135,10 +135,10 @@ function test_json()
         end
     end
 
-    func = "kox"
+    title = Dates.now()
 
     isdir("../jsons") || mkdir("../jsons")
-    open("../jsons/results-$func.json", "w") do io
+    open("../jsons/results-$title.json", "w") do io
         JSON.print(io, results)
     end
 end

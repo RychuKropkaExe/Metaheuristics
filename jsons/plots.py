@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
-df = pd.read_json('/Users/artniewski/julia/traveling-salesman-problem/jsons/results-kox.json', orient='records')
+df = pd.read_json('results-kox.json', orient='records')
 for tsp_problem in df:
     for result in df[tsp_problem]:
         kox = dict(sorted(result.items(), key=lambda key: int(key[0])))
