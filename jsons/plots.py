@@ -9,7 +9,8 @@ for tsp_problem in df:
         values = list(kox.values())
         # print(keys)
         # print(values)
-        plt.plot(keys, values)
+
+        plt.plot(kox.keys(), kox.values())
         # plt.yscale('log')
         # plt.minorticks_off()
     plt.title(tsp_problem)
