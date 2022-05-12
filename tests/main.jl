@@ -9,15 +9,42 @@ function tabuThreads(weights::Matrix, dimension)
     bestDist = typemax(Float64)
     lk = ReentrantLock()
     Threads.@threads for i in 1:Threads.nthreads()
-        # list = tabuSearch(kRandom(weights, dimension, 1000),weights,60,dimension)
+        list = tabuSearch(kRandom(weights, dimension, 1000), weights, 120, fld(dimension, 2), 10, dimension, 0.05, reverse_variant, reverse_variant_destination, false)
+        currentDistance = destination(weights, list)
         lock(lk)
-        if (destination(weights, list) < bestDist)
+        if (currentDistance < bestDist)
             results = list
+            bestDist = currentDistance
         end
         unlock(lk)
     end
     return results
 end
+
+function tabuThreadsCompare()
+    problems = ["a280.tsp"] # "a280.tsp", "bier127.tsp", 
+    println("\n\n\n")
+    #println("tabuThreadsCompare, threads: ", Threads.nthreads())
+    for i in problems
+        dict = structToDict(readTSP("../data/TSPLIB95/tsp/" * i))
+        weights = dict[:weights]
+        dimension = dict[:dimension]
+        println("problem: ", i)
+        bestThreadDist = typemax(Float64)
+        lk = ReentrantLock()
+        Threads.@threads for i in 1:Threads.nthreads()
+            list = tabuSearch(kRandom(weights, dimension, 1000), weights, 120, fld(dimension, 2), 10, dimension, 0.05, reverse_variant, reverse_variant_destination, false)
+            currentDistance = destination(weights, list)
+            lock(lk)
+            if (currentDistance < bestThreadDist)
+                bestThreadDist = currentDistance
+            end
+            unlock(lk)
+        end
+        println("result for ", Threads.nthreads(), " parallel tabuSearch: ", bestThreadDist)
+    end
+end
+
 
 function main()
     dict = structToDict(readTSPLIB(:a280))
@@ -25,24 +52,9 @@ function main()
     weights = dict[:weights]
     nodes = dict[:nodes]
     println(dict[:optimal])
-
-    #list = tabuSearch(twooptacc(kRandom(weights,dimension,1000),weights,nodes, false), weights,300,floor(Int,sqrt(dimension)))
-    #list = tabuThreads(weights, dimension)
-    #list = tabuSearch(kRandom(weights, dimension, 1000), weights, 3000, floor(Int, sqrt(dimension)), 10, false, 4000)
-    list = kRandom(weights, dimension, 1000)
-    #list = twooptacc(list,weights,nodes,true);
-    #tabuSearch(list,weights,500,7,10,dimension,0.02,false)
-    #destination(weights, list) |> println
-
-    list = tabuSearch(kRandom(weights, dimension, 1000), weights, 300, floor(Int, sqrt(dimension)), 0, dimension, 0.05, reverse_variant, reverse_variant_destination, false)
-    println(destination(weights, list))
-    # destination(weights, list) |> println
-
-    # sleep(3)
-    # #list::Array{Int} = nearestforall(weights, dimension, nodes, false)
-    # #destination(weights, list) |> println
-    # list = tabuSearch(list, weights, 100, 10)
-    # destination(weights, list) |> println
+    list = tabuSearch(kRandom(weights, dimension, 1000), weights, 120, fld(dimension, 2), 10, dimension, 0.05, reverse_variant, reverse_variant_destination, false)
+    dest = destination(weights, list)
+    println("destination: ", dest)
 end
 
-main()
+tabuThreadsCompare()

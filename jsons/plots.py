@@ -7,7 +7,8 @@ import pathlib
 
 
 def main():
-    for result_type in ["long0", "rand_tabu", "reverse", "swap"]:
+    for result_type in ["reverse", "swap", "with_tuner_values", "without_aspiration", "random_tabu_length",
+                        "random_long_term_length", "long_term_length_0"]:
         df = pd.read_json("results-" + result_type + ".json", orient='records')
         all_avg_dict = dict()
         for tsp_problem, tsp_list in df.items():
@@ -21,7 +22,6 @@ def main():
             for k, v in dd.items():
                 avg_dict[int(k)] = int(np.floor(st.mean(v)))
             all_avg_dict[tsp_problem] = avg_dict
-
         for tsp_problem, tsp_list in df.items():
             path = pathlib.Path("plots/" + tsp_problem)
             path.mkdir(parents=True, exist_ok=True)

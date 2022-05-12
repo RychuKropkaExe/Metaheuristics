@@ -117,20 +117,20 @@ function tabuSearch(
                 #if upgrade_time_elapsed > UPGRADE_TIME
                 upgrade_iter = 0
                 UPGRADE_LIMIT += iterations ÷ 40
-                println("limit : ", UPGRADE_LIMIT)
-                println("iterations : ", iterations)
+#                println("limit : ", UPGRADE_LIMIT)
+#                println("iterations : ", iterations)
                 if isempty(longTermMemory)
                     # if time elapsed is more than f.e. 95% continue instead of shuffling
-                    if time_elapsed < TIME_LIMIT * (1 - timeMargin)
+                    if time_elapsed < Second(floor(Int, TIME_LIMIT.value * (1 - timeMargin)))
                         shuffle!(globalCities)
-                        println("UPGRADING (shuffle)")
+#                        println("UPGRADING (shuffle)")
                     end
                 else
                     kick = pop!(longTermMemory)
                     globalCities = kick[1]
                     tabuList = kick[2]
                     localCities = kick[1]
-                    println("KICKING")
+#                    println("KICKING")
                 end
                 break
             end
@@ -171,7 +171,7 @@ function tabuSearch(
             if longTimeLen > 0
                 push!(longTermMemory, [globalCities, savedTabu])
             end
-            println("New best distance: ", bestDist)
+#            println("New best distance: ", bestDist)
             #update time since last update
             upgrade_time_elapsed = Second(0)
             upgrade_start = Dates.now()

@@ -1,0 +1,72 @@
+
+
+
+
+problem: pcb1173.tsp
+result for 1 parallel tabuSearch: 64163.0
+
+
+
+
+problem: pcb1173.tsp
+result for 2 parallel tabuSearch: 64158.0
+
+
+
+
+problem: pcb1173.tsp
+result for 4 parallel tabuSearch: 64220.0
+
+
+
+
+problem: pcb1173.tsp
+result for 8 parallel tabuSearch: 64094.0
+
+
+
+
+problem: pla33810.tsp
+result for 1 parallel tabuSearch: 9.341902489e9
+
+
+
+
+problem: pla33810.tsp
+result for 2 parallel tabuSearch: 9.331887144e9
+
+
+
+
+problem: pla33810.tsp
+result for 4 parallel tabuSearch: 9.340760222e9
+
+
+
+
+problem: pla33810.tsp
+result for 8 parallel tabuSearch: 9.329018503e9
+
+
+
+
+problem: a280.tsp
+result for 1 parallel tabuSearch: 2650.0
+
+
+
+
+problem: a280.tsp
+result for 2 parallel tabuSearch: 2680.0
+
+
+
+
+problem: a280.tsp
+result for 4 parallel tabuSearch: 2690.0
+
+
+
+
+problem: a280.tsp
+result for 8 parallel tabuSearch: 2699.0
