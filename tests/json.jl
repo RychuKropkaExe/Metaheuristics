@@ -28,7 +28,7 @@ function jsonTabuSearch(
     UPGRADE_LIMIT::Int = upgrIterLimit
     globalCities::Array{Int} = copy(cities)
     currAttempt = Dict()
-    currAttempt[fld(time_elapsed.value, 1000)] = bestDist
+    #currAttempt[fld(time_elapsed.value, 1000)] = bestDist
     while (true)
         iterations += 1
         upgrade_iter += 1
@@ -94,12 +94,14 @@ function jsonTabuSearch(
             bestDist = localDist
             bestCities = localCities
             savedTabu = copy(tabuList)
-            if length(longTermMemory) == longTimeLen
+            if length(longTermMemory) == longTimeLen && !isempty(longTermMemory)
                 popfirst!(longTermMemory)
             end
             popfirst!(savedTabu)
             push!(savedTabu, move)
-            push!(longTermMemory, [globalCities, savedTabu])
+            if longTimeLen > 0
+                push!(longTermMemory, [globalCities, savedTabu])
+            end
             #println("New best distance: ", bestDist)
             upgrade_iter = 0
         end
@@ -116,9 +118,40 @@ end
 
 
 
-function test_json()
+function test_json1()
     results = Dict()
-    problems = ["a280.tsp", "bier127.tsp", "u1432.tsp", "ch150.tsp", "u1817.tsp", "rl1323.tsp", "eil101.tsp", "eil51.tsp", "eil76.tsp", "fl417.tsp"]
+    problems = ["a280.tsp", "bier127.tsp", "pcb1173.tsp", "ch150.tsp", "vm1084.tsp", "u1060.tsp", "eil101.tsp", "eil51.tsp", "eil76.tsp", "fl417.tsp"]
+    #problems = ["pcb1173.tsp",  "vm1084.tsp", "u1060.tsp"]
+
+    title = "reverse"
+    for i in problems
+        results[i] = []
+        lk = ReentrantLock()
+        Threads.@threads for t in 1:Threads.nthreads()
+            dict = structToDict(readTSP("../data/TSPLIB95/tsp/" * i))
+            dimension = dict[:dimension]
+            weights = dict[:weights]
+            curr = jsonTabuSearch(kRandom(weights, dimension, 1000), weights, 100, floor(Int, sqrt(dimension)), floor(Int, log2(dimension)), dimension, 0.05, reverse_variant, reverse_variant_destination, false)
+            lock(lk)
+            push!(results[i], curr)
+            unlock(lk)
+            println("finished thread: ", t, " problem ", i, "title: ", title)
+        end
+    end
+
+
+    isdir("../jsons") || mkdir("../jsons")
+    open("../jsons/results-$title.json", "w") do io
+        JSON.print(io, results)
+    end
+end
+
+function test_json2()
+    results = Dict()
+    problems = ["a280.tsp", "bier127.tsp", "pcb1173.tsp", "ch150.tsp", "vm1084.tsp", "u1060.tsp", "eil101.tsp", "eil51.tsp", "eil76.tsp", "fl417.tsp"]
+    #problems = ["pcb1173.tsp",  "vm1084.tsp", "u1060.tsp"]
+
+    title = "long0"
 
     for i in problems
         results[i] = []
@@ -127,15 +160,14 @@ function test_json()
             dict = structToDict(readTSP("../data/TSPLIB95/tsp/" * i))
             dimension = dict[:dimension]
             weights = dict[:weights]
-            curr = jsonTabuSearch(kRandom(weights, dimension, 1000), weights, 120, floor(Int, sqrt(dimension)), 10, dimension, 0.05, reverse_variant, reverse_variant_destination, false)
+            curr = jsonTabuSearch(kRandom(weights, dimension, 1000), weights, 100, floor(Int, sqrt(dimension)), 0, dimension, 0.05, reverse_variant, reverse_variant_destination, false)
             lock(lk)
             push!(results[i], curr)
             unlock(lk)
-            println("finished thread: ", t, " problem ", i)
+            println("finished thread: ", t, " problem ", i, "title: ", title)
         end
     end
 
-    title = Dates.now()
 
     isdir("../jsons") || mkdir("../jsons")
     open("../jsons/results-$title.json", "w") do io
@@ -143,4 +175,71 @@ function test_json()
     end
 end
 
-@time test_json()
+function test_json4()
+    results = Dict()
+    problems = ["a280.tsp", "bier127.tsp", "pcb1173.tsp", "ch150.tsp", "vm1084.tsp", "u1060.tsp", "eil101.tsp", "eil51.tsp", "eil76.tsp", "fl417.tsp"]
+    #problems = ["pcb1173.tsp",  "vm1084.tsp", "u1060.tsp"]
+
+    title = "rand_tabu"
+    for i in problems
+        results[i] = []
+        lk = ReentrantLock()
+        Threads.@threads for t in 1:Threads.nthreads()
+            dict = structToDict(readTSP("../data/TSPLIB95/tsp/" * i))
+            dimension = dict[:dimension]
+            weights = dict[:weights]
+            curr = jsonTabuSearch(kRandom(weights, dimension, 1000), weights, 100, rand((1:dimension)), floor(Int, log2(dimension)), dimension, 0.05, reverse_variant, reverse_variant_destination, false)
+            lock(lk)
+            push!(results[i], curr)
+            unlock(lk)
+            println("finished thread: ", t, " problem ", i, "title: ", title)
+        end
+    end
+
+
+    isdir("../jsons") || mkdir("../jsons")
+    open("../jsons/results-$title.json", "w") do io
+        JSON.print(io, results)
+    end
+end
+
+
+function test_json3()
+    results = Dict()
+    problems = ["a280.tsp", "bier127.tsp", "pcb1173.tsp", "ch150.tsp", "vm1084.tsp", "u1060.tsp", "eil101.tsp", "eil51.tsp", "eil76.tsp", "fl417.tsp"]
+    #problems = ["pcb1173.tsp",  "vm1084.tsp", "u1060.tsp"]
+
+    title = "swap"
+    for i in problems
+        results[i] = []
+        lk = ReentrantLock()
+        Threads.@threads for t in 1:Threads.nthreads()
+            dict = structToDict(readTSP("../data/TSPLIB95/tsp/" * i))
+            dimension = dict[:dimension]
+            weights = dict[:weights]
+            curr = jsonTabuSearch(kRandom(weights, dimension, 1000), weights, 100, floor(Int, sqrt(dimension)), floor(Int, log2(dimension)), dimension, 0.05, swap_variant, swap_variant_destination, false)
+            lock(lk)
+            push!(results[i], curr)
+            unlock(lk)
+            println("finished thread: ", t, " problem ", i, "title: ", title)
+        end
+    end
+
+
+    isdir("../jsons") || mkdir("../jsons")
+    open("../jsons/results-$title.json", "w") do io
+        JSON.print(io, results)
+    end
+end
+
+
+# @time test_json1()
+# @time test_json2()
+# @time test_json3()
+@time test_json4()
+
+
+# curr = jsonTabuSearch(kRandom(weights, dimension, 1000), weights, 100, floor(Int, sqrt(dimension)), floor(Int, log2(dimension)), dimension, 0.05, reverse_variant, reverse_variant_destination, false)
+# curr = jsonTabuSearch(kRandom(weights, dimension, 1000), weights, 100, floor(Int, sqrt(dimension)), 0, dimension, 0.05, reverse_variant, reverse_variant_destination, false)
+# curr = jsonTabuSearch(kRandom(weights, dimension, 1000), weights, 100, floor(Int, rand(dimension)), floor(Int, log2(dimension)), dimension, 0.05, reverse_variant, reverse_variant_destination, false)
+# curr = jsonTabuSearch(kRandom(weights, dimension, 1000), weights, 100, floor(Int, sqrt(dimension)), floor(Int, log2(dimension)), dimension, 0.05, swap_variant, swap_variant_destination, false)

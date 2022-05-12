@@ -163,12 +163,14 @@ function tabuSearch(
             bestDist = localDist
             bestCities = localCities
             savedTabu = copy(tabuList)
-            if length(longTermMemory) == longTimeLen
+            if length(longTermMemory) == longTimeLen && !isempty(longTermMemory)
                 popfirst!(longTermMemory)
             end
             popfirst!(savedTabu)
             push!(savedTabu, move)
-            push!(longTermMemory, [globalCities, savedTabu])
+            if longTimeLen > 0
+                push!(longTermMemory, [globalCities, savedTabu])
+            end
             println("New best distance: ", bestDist)
             #update time since last update
             upgrade_time_elapsed = Second(0)

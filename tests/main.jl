@@ -34,7 +34,7 @@ function main()
     #tabuSearch(list,weights,500,7,10,dimension,0.02,false)
     #destination(weights, list) |> println
 
-    list = tabuSearch(kRandom(weights, dimension, 1000), weights, 300, floor(Int, sqrt(dimension)), 10, dimension, 0.05, reverse_variant, reverse_variant_destination, false)
+    list = tabuSearch(kRandom(weights, dimension, 1000), weights, 300, floor(Int, sqrt(dimension)), 0, dimension, 0.05, reverse_variant, reverse_variant_destination, false)
     println(destination(weights, list))
     # destination(weights, list) |> println
 
