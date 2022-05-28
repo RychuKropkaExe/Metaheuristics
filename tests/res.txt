@@ -51,7 +51,7 @@ result for 8 parallel tabuSearch: 9.329018503e9
 
 
 problem: a280.tsp
-result for 1 parallel tabuSearch: 2650.0
+result for 1 parallel tabuSearch: 2699.0
 
 
 
@@ -69,4 +69,5 @@ result for 4 parallel tabuSearch: 2690.0
 
 
 problem: a280.tsp
-result for 8 parallel tabuSearch: 2699.0
+result for 8 parallel tabuSearch: 2650.0
+

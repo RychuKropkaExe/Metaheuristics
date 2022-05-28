@@ -36,6 +36,7 @@ def main():
             plt.title(tsp_problem + " - " + result_type)
             curr_dict = all_avg_dict[tsp_problem]
             keys = [int(i) for i in curr_dict.keys()]
+            keys = np.sort(keys)
             values = [curr_dict[i] for i in keys]
             plt.scatter(keys, values, c='black', s=10, zorder=10)
             plt.scatter(keys, values, c='white', s=1, zorder=10)
