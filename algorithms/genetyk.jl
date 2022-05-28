@@ -1,4 +1,5 @@
 include("../utils/all.jl")
+include("2opt.jl")
 using TimesDates
 using Dates
 using TSPLIB
@@ -39,7 +40,9 @@ function genetic(config::Config, f::GeneticFunctions)
 
     start::DateTime = Dates.now()
     population::Array{Chromosome} = f.initialize_population(config.tsp, config.population_size)
-    best::Float64 = minimum(x -> x.distance, population)
+    min_value::Float64 = minimum(x -> x.distance, population)
+    println("Initial distance: ", min_value)
+    best::Float64 = min_value
     generation::Int = 0
     while (Dates.now() - start < config.time)
         parents::Array{Tuple{Chromosome,Chromosome}} = f.parents_selection(population, config.crossovers_count)
@@ -57,7 +60,11 @@ function genetic(config::Config, f::GeneticFunctions)
             chromosome.age += 1
         end
         append!(population, children)
-        best = min(best, minimum(x -> x.distance, population))
+        min_value = minimum(x -> x.distance, population)
+        if min_value < best
+            best = min_value
+            println("Generation: ", generation, " Best: ", best, " Time: ", Dates.now() - start)
+        end
         f.select_next_gen!(population, config.population_size)
         generation += 1
     end
@@ -69,6 +76,12 @@ function random_population(tsp_dict::Dict, n::Int)::Array{Chromosome}
     dimension::Int = tsp_dict[:dimension]
     weights::Matrix{Float64} = tsp_dict[:weights]
     return [Chromosome(shuffle!(collect(1:dimension)), weights) for _ in 1:n]
+end
+
+function balanced_population(tsp_dict::Dict, n::Int)::Array{Chromosome}
+    dimension::Int = tsp_dict[:dimension]
+    weights::Matrix{Float64} = tsp_dict[:weights]
+    return [Chromosome(k < 0.8 * n ? shuffle!(collect(1:dimension)) : twoopt(shuffle!(collect(1:dimension)), weights, tsp_dict[:nodes], false), weights) for k in 1:n]
 end
 
 function random_selection(population::Array{Chromosome}, n::Int)::Array{Tuple{Chromosome,Chromosome}}
@@ -86,16 +99,52 @@ function swap(a::Array{Int}, b::Array{Int})::Array{Array{Int}}
     indx_b::Int = rand(2:len)
     min_indx = min(indx_a, indx_b)
     max_indx = max(indx_a, indx_b)
+
     path_a::Array{Int} = []
+    set_b::Set{Int} = Set(b[min_indx:max_indx])
+    cnt_a::Int = 0
+    i::Int = 1
+    while true
+        if in(a[i], set_b)
+            i += 1
+        else
+            push!(path_a, a[i])
+            cnt_a += 1
+            i += 1
+        end
+
+        if cnt_a == min_indx - 1
+            append!(path_a, b[min_indx:max_indx])
+            cnt_a += max_indx - min_indx + 1
+        end
+
+        if i > len
+            break
+        end
+    end
+
+    set_a::Set{Int} = Set(a[min_indx:max_indx])
     path_b::Array{Int} = []
+    cnt_b::Int = 0
+    j::Int = 1
+    while true
+        if in(b[j], set_a)
+            j += 1
+        else
+            push!(path_b, b[j])
+            cnt_b += 1
+            j += 1
+        end
 
-    append!(path_a, @view a[1:min_indx-1])
-    append!(path_a, @view b[min_indx:max_indx-1])
-    append!(path_a, @view a[max_indx:len])
+        if cnt_b == min_indx - 1
+            append!(path_b, a[min_indx:max_indx])
+            cnt_b += max_indx - min_indx + 1
+        end
 
-    append!(path_b, @view b[1:min_indx-1])
-    append!(path_b, @view a[min_indx:max_indx-1])
-    append!(path_b, @view b[max_indx:len])
+        if j > len
+            break
+        end
+    end
     return [path_a, path_b]
 end
 
@@ -120,27 +169,39 @@ function swap_mutation!(child_path::Array{Int}, mutation_rate::Float64)
     end
 end
 
+function reverse_mutation!(child_path::Array{Int}, mutation_rate::Float64)
+    len::Float64 = length(child_path)
+    for _ in 1:2
+        if rand() < mutation_rate
+            rand_indx::Int = rand(1:len)
+            rand_indx2::Int = rand(1:len)
+            reverse!(child_path, rand_indx, rand_indx2)
+        end
+    end
+end
+
 function select_top_next_gen!(population::Array{Chromosome}, n::Int)
     sorted::Array{Chromosome} = sort(population, by=x -> x.distance)
     population = @view sorted[1:n]
 end
 
 function main()
-    dict = structToDict(readTSPLIB(:bier127))
+    dict = structToDict(readTSPLIB(:berlin52))
     parameters::Config = Config(
         dict,
-        Second(10),
+        Second(60),
         100,
-        10,
-        0.3
+        100,
+        0.5
     )
     functions::GeneticFunctions = GeneticFunctions(
         random_population,
-        random_selection,
+        weighted_selection,
         swap_crossover,
-        swap_mutation!,
+        reverse_mutation!,
         select_top_next_gen!
     )
+    println(dict[:optimal])
     genetic(parameters, functions) |> println
 end
 
