@@ -42,10 +42,10 @@ function genetic(config::Config, f::GeneticFunctions)
     start::DateTime = Dates.now()
     population::Array{Chromosome} = f.initialize_population(config.tsp, config.population_size)
     min_value::Float64 = minimum(x -> x.distance, population)
-    println("Initial distance: ", min_value)
     best::Float64 = min_value
     generation::Int = 0
     while (Dates.now() - start < config.time)
+        println(length(population))
         parents::Array{Tuple{Chromosome,Chromosome}} = f.parents_selection(population, config.crossovers_count)
         children_paths::Array{Array{Int}} = f.crossover(parents)
         for child_path::Array{Int} in children_paths
@@ -66,7 +66,7 @@ function genetic(config::Config, f::GeneticFunctions)
             best = min_value
             println("Generation: ", generation, " Best: ", best, " Time: ", Dates.now() - start)
         end
-        f.select_next_gen!(population, config.population_size)
+        population = f.select_next_gen!(population, config.population_size)
         generation += 1
     end
     println("Generation: ", generation)
@@ -93,8 +93,38 @@ function weighted_selection(population::Array{Chromosome}, n::Int)::Array{Tuple{
     return [Tuple(sample(population, Weights((p -> p.fitness).(population)), 2)) for _ in 1:n]
 end
 
-function fitness_selection()
-end
+function roulette_wheel_selection(population::Array{Chromosome}, n::Int)::Array{Tuple{Chromosome,Chromosome}}
+    sum = 0
+    sorted_population = sort(population, by=x -> x.fitness)
+    for i in 1:length(population)
+        sum += population[i].fitness
+    end
+    order = floor(sum) + 1
+    parents::Array{Tuple{Chromosome,Chromosome}} = []
+    for i in 1:n
+        count = 0
+        pair::Array{Chromosome} = []
+        while count != 2
+            partial_sum = 0
+            limit = rand(Float64)*order
+            for j in 1:length(sorted_population)
+                partial_sum += sorted_population[j].fitness
+                if partial_sum > limit
+                    if count == 1 && pair[1] == sorted_population[j]
+                        continue
+                    else
+                        push!(pair, sorted_population[j])
+                        count += 1
+                        partial_sum = 0
+                        break
+                    end
+                end
+            end
+        end
+        push!(parents,(pair[1],pair[2]))
+    end
+    return parents
+end     
 
 function swap(a::Array{Int}, b::Array{Int})::Array{Array{Int}}
     len::Int = length(a)
@@ -297,6 +327,7 @@ function order(a::Array{Int}, b::Array{Int})::Array{Array{Int}}
     end
     return [path_a, path_b]
 end
+
 function order_crossover(parents::Array{Tuple{Chromosome,Chromosome}})::Array{Array{Int}}
     children_paths::Array{Array{Int}} = []
     for pair in parents
@@ -332,12 +363,14 @@ end
 
 function select_top_next_gen!(population::Array{Chromosome}, n::Int)
     sorted::Array{Chromosome} = sort(population, by=x -> x.distance)
-    population = @view sorted[1:n]
+    #population = @view sorted[1:n]
+    return sorted[1:n]
 end
 
 function main()
     dict = structToDict(readTSPLIB(:berlin52))
-    println(destination(dict[:weights],twooptacc(kRandom(dict[:weights],dict[:dimension],10),dict[:weights],dict[:nodes],false)))
+    #println(destination(dict[:weights],twooptacc(kRandom(dictA[:weights],dict[:dimension],10),dict[:weights],dict[:nodes],false)))
+    println("k-random: ", destination(dict[:weights],kRandom(dict[:weights],dict[:dimension],100000)))
     parameters::Config = Config(
         dict,
         Second(600),
@@ -347,8 +380,8 @@ function main()
     )
     functions::GeneticFunctions = GeneticFunctions(
         random_population,
-        weighted_selection,
-        order_crossover,
+        roulette_wheel_selection,
+        swap_crossover,
         swap_mutation!,
         select_top_next_gen!
     )
