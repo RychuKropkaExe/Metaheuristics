@@ -1,5 +1,6 @@
 include("../utils/all.jl")
 include("2opt.jl")
+include("krandom.jl")
 using TimesDates
 using Dates
 using TSPLIB
@@ -158,6 +159,69 @@ function swap_crossover(parents::Array{Tuple{Chromosome,Chromosome}})::Array{Arr
     return children_paths
 end
 
+function partial_mapping(a::Array{Int}, b::Array{Int})::Array{Array{Int}}
+    path_a::Array{Int} = copy(a)
+    path_a.=0
+    path_b::Array{Int} = copy(b)
+    path_b.=0
+
+    mapping_a = Dict{Int,Int}()
+    mapping_b = Dict{Int,Int}()
+
+    cut_1 = rand(3:length(a)-3)
+    cut_2 = cut_1
+    while cut_2 == cut_1
+        cut_2 = rand(cut_1+1:length(a))
+    end
+
+    path_a[1:cut_1] = a[1:cut_1]
+    path_a[cut_2:length(a)] = a[cut_2:length(a)]
+    path_a[cut_1+1:cut_2-1] = b[cut_1+1:cut_2-1]
+    path_b[1:cut_1] = b[1:cut_1]
+    path_b[cut_2:length(a)] = b[cut_2:length(a)]
+    path_b[cut_1+1:cut_2-1] = a[cut_1+1:cut_2-1]
+
+    for i in cut_1+1:cut_2-1
+        mapping_a[a[i]] = b[i]
+        mapping_b[b[i]] = a[i]
+    end
+
+    #iskey
+    for i in 1:length(a)
+        if i > cut_1 && i < cut_2
+            continue
+        elseif haskey(mapping_b,path_a[i])
+            if  haskey(mapping_b, mapping_b[path_a[i]])
+                path_a[i] = mapping_b[mapping_b[path_a[i]]]
+            else
+                path_a[i] = mapping_b[path_a[i]]
+            end
+        end
+    end
+    for i in 1:length(a)
+        if i > cut_1 && i < cut_2
+            continue
+        elseif haskey(mapping_a,path_b[i])
+            if  haskey(mapping_a, mapping_a[path_b[i]])
+                path_b[i] = mapping_a[mapping_a[path_b[i]]]
+            else
+                path_b[i] = mapping_a[path_b[i]]
+            end
+        end
+    end
+    return [path_a, path_b]
+end
+
+function pm_crossover(parents::Array{Tuple{Chromosome,Chromosome}})::Array{Array{Int}}
+    children_paths::Array{Array{Int}} = []
+    for pair in parents
+        parent_a::Chromosome = pair[1]
+        parent_b::Chromosome = pair[2]
+        append!(children_paths, partial_mapping(parent_a.path, parent_b.path))
+    end
+    return children_paths
+end
+
 function swap_mutation!(child_path::Array{Int}, mutation_rate::Float64)
     len::Float64 = length(child_path)
     for _ in 1:3
@@ -187,17 +251,18 @@ end
 
 function main()
     dict = structToDict(readTSPLIB(:berlin52))
+    println(destination(dict[:weights],twooptacc(kRandom(dict[:weights],dict[:dimension],10),dict[:weights],dict[:nodes],false)))
     parameters::Config = Config(
         dict,
-        Second(60),
+        Second(600),
         100,
-        100,
-        0.5
+        20,
+        0.0
     )
     functions::GeneticFunctions = GeneticFunctions(
-        random_population,
+        balanced_population,
         weighted_selection,
-        swap_crossover,
+        pm_crossover,
         reverse_mutation!,
         select_top_next_gen!
     )
