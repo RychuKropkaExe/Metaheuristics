@@ -47,20 +47,18 @@ function select_top_next_gen!(population::Array{Chromosome}, n::Int)
 end
 
 function main()
-    dict = structToDict(readTSPLIB(:berlin52))
-    #println(destination(dict[:weights],twooptacc(kRandom(dictA[:weights],dict[:dimension],10),dict[:weights],dict[:nodes],false)))
-    println("k-random: ", destination(dict[:weights],kRandom(dict[:weights],dict[:dimension],100000)))
+    dict = structToDict(readTSPLIB(:a280))
     parameters::Config = Config(
         dict,
         Second(60),
         100,
-        50,
+        100,
         0.05
     )
     functions::GeneticFunctions = GeneticFunctions(
-        random_population,
+        k_means_clustering,
         tournament_selection,
-        swap_crossover,
+        pm_crossover,
         reverse_mutation!,
         select_top_next_gen!
     )

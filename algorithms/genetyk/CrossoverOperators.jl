@@ -1,6 +1,9 @@
 include("Structs.jl")
 function swap(a::Array{Int}, b::Array{Int})::Array{Array{Int}}
     len::Int = length(a)
+    if length(a) != length(b)
+        println("UMM  GUCCI?")
+    end
     indx_a::Int = rand(2:len)
     indx_b::Int = rand(2:len)
     min_indx = min(indx_a, indx_b)
