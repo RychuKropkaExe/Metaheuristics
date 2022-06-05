@@ -21,6 +21,23 @@ function plotForTwo(arrx::Array, arry::Array, arry2::Array, t::String, xl::Strin
     title(t)
     show()
 end
+
+function plotForAny(arrx::Array,arry::Array,title1::String,t::Array,xl::String,yl::String)
+    maxs = []
+    for i in 1:length(arry)
+        push!(maxs,maximum(arry[i]))
+    end
+    for i in 1:length(arry)
+        plot(arrx,arry[i], label = t[i])
+        axis([arrx[1],arrx[length(arrx)],0,maximum(maxs)])
+    end
+    legend()
+    xlabel(xl)
+    ylabel(yl)
+    title(title1)
+    show()
+end
+
 function plotForFour(arrx::Array, arry::Array, arry2::Array,arry3::Array,arry4::Array,t::String, xl::String, yl::String, firstPlot::String, secondPlot::String, thirdPlot::String, fourthPlot::String)
     plot(arrx,arry, label = firstPlot)
     plot(arrx,arry2, label = secondPlot)
