@@ -48,18 +48,21 @@ end
 
 function main()
     dict = structToDict(readTSPLIB(:a280))
+    initialize_dict(dict)
+    println(destination(dict[:weights],kRandom(dict[:weights],dict[:dimension],100000)))
+    println(destination(dict[:weights],twooptacc(kRandom(dict[:weights],dict[:dimension],10000),dict[:weights],dict[:nodes],false)))
     parameters::Config = Config(
         dict,
-        Second(60),
-        100,
-        100,
+        Second(600),
+        280,
+        280,
         0.05
     )
     functions::GeneticFunctions = GeneticFunctions(
         k_means_clustering,
         tournament_selection,
         pm_crossover,
-        reverse_mutation!,
+        IRGIBNNM_mutation_XD,
         select_top_next_gen!
     )
     println(dict[:optimal])
