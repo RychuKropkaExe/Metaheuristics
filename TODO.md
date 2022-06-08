@@ -1,1 +1,1 @@
-1. 
+1. Ulepszenie zapobiegania stagnacji

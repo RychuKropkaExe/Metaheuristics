@@ -10,6 +10,7 @@ struct Config
     population_size::Int
     crossovers_count::Int
     mutation_rate::Float64
+    max_stagnation::Int
 end
 
 struct GeneticFunctions
@@ -19,6 +20,21 @@ struct GeneticFunctions
     mutation!::Function
     select_next_gen!::Function
 end
+
+mutable struct Island
+    id::Int
+    population::Array
+    size::Int
+    selection_operator::Function
+    crossover_operator::Function
+    mutation_operator::Function
+    mutation_rate::Float64
+    useless_generations::Int
+    generation::Int
+    island_best::Float64
+    elite_deployment_rate::Int
+end
+
 
 
 mutable struct Chromosome

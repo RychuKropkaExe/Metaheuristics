@@ -6,6 +6,7 @@ dict = Dict{Any,Any}()
 function initialize_dict(tsp_dict::Dict)
     global dict = tsp_dict
 end
+
 function swap_mutation!(child_path::Array{Int}, mutation_rate::Float64)
     len::Float64 = length(child_path)
     for _ in 1:3
@@ -16,6 +17,7 @@ function swap_mutation!(child_path::Array{Int}, mutation_rate::Float64)
         end
     end
 end
+
 function reverse_mutation!(child_path::Array{Int}, mutation_rate::Float64)
     len::Float64 = length(child_path)
     for _ in 1:2
