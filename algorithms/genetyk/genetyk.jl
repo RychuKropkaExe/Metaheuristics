@@ -170,6 +170,9 @@ function select_top_next_gen!(population::Array{Chromosome}, n::Int)
     return sorted[1:n]
 end
 
+function replace_old_gen!(population::Array{Chromosome}, n::Int)
+    return population[n+1:2*n]
+end
 function main()
     dict = structToDict(readTSPLIB(:berlin52))
     initialize_dict(dict)
@@ -179,16 +182,23 @@ function main()
         dict,
         Second(60),
         280,
-        280,
+        140,
         0.05,
         500
     )
     functions::GeneticFunctions = GeneticFunctions(
         k_means_clustering,
         tournament_selection,
-        order_crossover,
-        reverse_mutation!,
+        pm_crossover,
+        IRGIBNNM_mutation_XD!,
         select_top_next_gen!
+    )
+    IF_functions::GeneticFunctions = GeneticFunctions(
+        random_population,
+        roulette_wheel_selection,
+        op_crossover,
+        swap_mutation!,
+        replace_old_gen!
     )
     println(dict[:optimal])
     genetic(parameters, functions) |> println
