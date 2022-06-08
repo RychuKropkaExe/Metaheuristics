@@ -48,6 +48,7 @@ function IRGIBNNM_mutation_XD(child_path::Array{Int}, mutation_rate::Float64)
             swap_point = nearest_point_index - rand(0:4)
             if swap_point < 1
                 swap_point = len + swap_point
+                swap_point == 0 ? len : swap_point
             end
             child_path[nearest_point_index], child_path[swap_point] = child_path[swap_point], child_path[nearest_point_index]
         end

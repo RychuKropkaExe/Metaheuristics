@@ -3,7 +3,7 @@ include("../2opt.jl")
 include("../krandom.jl")
 include("all.jl")
 include("Structs.jl")
-
+include("NextGenOperators.jl")
 
 function genetic(config::Config, f::GeneticFunctions)
 
@@ -65,13 +65,13 @@ function initialize_elite_island(config::Config,f::GeneticFunctions)
     f.initialize_population(config.tsp,config.population_size),
     config.population_size,
     tournament_selection,
-    pm_crossover,
+    order_crossover,
     IRGIBNNM_mutation_XD,
-    0.05,
+    0.04,
     0,
     0,
     Inf,
-    config.max_stagnation*2)
+    config.max_stagnation)
 end
 
 function island_genetic(config::Config, f::GeneticFunctions)
@@ -79,7 +79,7 @@ function island_genetic(config::Config, f::GeneticFunctions)
     challengers = [Array{Chromosome,1}() for _ in 1:Threads.nthreads()]
     selection_operators = [random_selection,roulette_wheel_selection,tournament_selection,weighted_selection]
     mutation_operators = [swap_mutation!,reverse_mutation!,IRGIBNNM_mutation_XD]
-    crossover_operators = [swap_crossover,pm_crossover,order_crossover]
+    crossover_operators = [swap_crossover,pm_crossover,order_crossover,op_crossover]
     islands::Array{Island} = []
     push!(islands, initialize_elite_island(config,f))
     for i in 2:Threads.nthreads()
@@ -95,13 +95,15 @@ function island_genetic(config::Config, f::GeneticFunctions)
         Inf,
         config.max_stagnation))
     end
+    islands_len = length(islands)
     min_values = [minimum(x->x.distance,islands[i].population) for i in 1:length(islands)]
-    min_value::Float64 = minimum(min_values)
-    println("Initial distance: ", min_value)
-    best::Float64 = min_value
-    generation::Int = 0
+    #min_value::Float64 = minimum(min_values)
+    println("Initial distance: ", minimum(min_values))
+    best::Float64 =  minimum(min_values)
     lk = ReentrantLock()
     Threads.@threads for i in 1:Threads.nthreads()
+        weights::Matrix{Float64} = config.tsp[:weights]
+        min_value::Float64 = minimum(min_values)
         while (Dates.now() - start < config.time)
             islands[i].generation += 1
             parents::Array{Tuple{Chromosome,Chromosome}} = islands[i].selection_operator(islands[i].population,config.crossovers_count)
@@ -109,7 +111,6 @@ function island_genetic(config::Config, f::GeneticFunctions)
             for child_path::Array{Int} in children_paths
                 islands[i].mutation_operator(child_path,islands[i].mutation_rate)
             end
-            weights::Matrix{Float64} = config.tsp[:weights]
             children::Array{Chromosome} = []
             for child_path::Array{Int} in children_paths
                 child::Chromosome = Chromosome(child_path, weights)
@@ -118,80 +119,85 @@ function island_genetic(config::Config, f::GeneticFunctions)
             for chromosome::Chromosome in islands[i].population
                 chromosome.age += 1
             end
-            temp_population = copy(islands[i].population)
+            temp_population = islands[i].population
             append!(temp_population, children)
-            min_value = minimum(x -> x.distance, temp_population)
+            islands[i].population = f.select_next_gen!(temp_population,islands[i].size)
+            min_value = islands[i].population[1].distance
             if min_value < islands[i].island_best
                 islands[i].island_best = min_value
                 islands[i].useless_generations = 0
+                println("Island: ",islands[i].id," Generation: ", islands[i].generation, " Best: ", min_value, " Time: ", Dates.now() - start)
             else
                 islands[i].useless_generations += 1
             end 
-            lock(lk)
-                if min_value < best
-                    best = min_value
-                    println("Island: ",islands[i].id," Generation: ", islands[i].generation, " Best: ", best, " Time: ", Dates.now() - start)
-                end
-            unlock(lk)
-            sorted::Array{Chromosome} = sort(temp_population, by=x -> x.distance)
-            islands[i].population = sorted[1:islands[i].size]
-            elite = sorted[1:floor(Int,config.population_size/2)]
+            elite = islands[i].population[1:floor(Int,config.population_size/4)]
             if (islands[i].generation - 1) % islands[i].elite_deployment_rate == 0 
                 lock(lk)
+                try
                     challengers[i] = elite
-                unlock(lk)
+                finally
+                    unlock(lk)
+                end
             end
             if islands[i].useless_generations >= config.max_stagnation
                 islands[i].useless_generations = 0
                 println("Migration on island: ", i)
                 migrants::Array{Chromosome} = []
-                choosen_island = rand(1:length(islands))
+                choosen_island = rand(1:islands_len)
                 while choosen_island == i
-                    choosen_island = rand(1:length(islands))
+                    choosen_island = rand(1:islands_len)
                 end
                 lock(lk)
-                    migrants = challengers[choosen_island]
-                unlock(lk)
-                islands[i].population[(1 + islands[i].size - floor(Int,islands[i].size/2)):islands[i].size] = migrants
+                try
+                    migrants = copy(challengers[choosen_island])
+                finally
+                    unlock(lk)
+                end
                 if i > 1
+                    islands[i].population[(1 + islands[i].size - floor(Int,islands[i].size/4)):islands[i].size] = migrants
                     islands[i].selection_operator = selection_operators[rand(1:length(selection_operators))]
                     islands[i].crossover_operator = crossover_operators[rand(1:length(crossover_operators))]
                     islands[i].mutation_operator = mutation_operators[rand(1:length(mutation_operators))]
-                    island[i].mutation_rate = rand(Float64)%0.05
+                    islands[i].mutation_rate = rand(Float64)%0.05
+                end
+                for _ in 1:floor(Int,islands[i].size/10)
+                    path_to_shuffle = copy(islands[i].population[rand(1:islands[i].size)].path)
+                    shuffle!(path_to_shuffle)
+                    islands[i].population[rand(1:islands[i].size)].path = path_to_shuffle
                 end
             end
         end
+        #println("ISLAND: ", i, " RESULT: ", islands[i].island_best, "GENERATION: ", islands[i].generation)
+        lock(lk)
+            if islands[i].island_best < best
+                best = islands[i].island_best
+            end
+        unlock(lk)
+        break
     end
+    #println("UMMMMMMM?")
     return best
 end
 
-function select_top_next_gen!(population::Array{Chromosome}, n::Int)
-    sorted::Array{Chromosome} = sort(population, by=x -> x.distance)
-    return sorted[1:n]
-end
-
-function replace_old_gen!(population::Array{Chromosome}, n::Int)
-    return population[n+1:2*n]
-end
 function main()
-    dict = structToDict(readTSPLIB(:berlin52))
+    dict = structToDict(readTSPLIB(:eil51))
     initialize_dict(dict)
     println(destination(dict[:weights],kRandom(dict[:weights],dict[:dimension],100000)))
     println(destination(dict[:weights],twooptacc(kRandom(dict[:weights],dict[:dimension],10000),dict[:weights],dict[:nodes],false)))
     parameters::Config = Config(
         dict,
         Second(60),
-        280,
-        140,
+        52,
+        26,
         0.05,
-        500
+        5000
     )
     functions::GeneticFunctions = GeneticFunctions(
         k_means_clustering,
         tournament_selection,
-        pm_crossover,
-        IRGIBNNM_mutation_XD!,
-        select_top_next_gen!
+        order_crossover,
+        reverse_mutation!,
+        select_tournament_next_gen
     )
     IF_functions::GeneticFunctions = GeneticFunctions(
         random_population,
@@ -201,7 +207,7 @@ function main()
         replace_old_gen!
     )
     println(dict[:optimal])
-    genetic(parameters, functions) |> println
+    island_genetic(parameters, functions) |> println
 end
 
-main()
+#main()
