@@ -1,0 +1,1 @@
+{"ftv64.atsp":[[["60 seconds","100","50","0.05","1000"],["random_population","random_selection","op_crossover","swap_mutation!","replace_old_gen!"],[[7374.0,{"value":0}],[7091.0,{"value":44}],[7063.0,{"value":46}],[6996.0,{"value":7188}],[6946.0,{"value":10784}],[6852.0,{"value":33171}],[6820.0,{"value":45499}],[6820.0,{"value":60}]]]]}

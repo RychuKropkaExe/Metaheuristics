@@ -1,0 +1,1 @@
+{"berlin52.tsp":[[["60 seconds","100","50","0.05","1000"],["random_population","roulette_wheel_selection","pm_crossover","swap_mutation!","replace_old_gen!"],[[26253.0,{"value":0}],[23896.0,{"value":20}],[23824.0,{"value":266}],[23094.0,{"value":626}],[23022.0,{"value":637}],[22222.0,{"value":1248}],[21978.0,{"value":3893}],[21978.0,{"value":60}]]]]}

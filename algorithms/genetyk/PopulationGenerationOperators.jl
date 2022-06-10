@@ -26,7 +26,8 @@ function k_means_clustering(tsp_dict::Dict, n::Int)::Array{Chromosome}
     end
 
     for i in 1:length(groups)
-        groups[i] = twooptacc(groups[i], weights,tsp_dict[:nodes],false)
+        #groups[i] = twooptacc(groups[i], weights,tsp_dict[:nodes],false)
+        #groups[i] = nearestExtended(tsp_dict[:weights],i,tsp_dict[:dimension])
     end
 
     population = Array{Chromosome,1}()

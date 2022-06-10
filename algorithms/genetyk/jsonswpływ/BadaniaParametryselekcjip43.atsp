@@ -1,0 +1,1 @@
+{"p43.atsp":[[["60 seconds","100","50","0.05","1000"],["random_population","random_selection","op_crossover","swap_mutation!","replace_old_gen!"],[[17113.0,{"value":0}],[17010.0,{"value":10}],[12010.0,{"value":13}],[11744.0,{"value":17}],[11702.0,{"value":43}],[6391.0,{"value":54}],[6316.0,{"value":55}],[6316.0,{"value":60}]]]]}

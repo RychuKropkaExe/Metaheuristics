@@ -1,0 +1,1 @@
+{"kro124p.atsp":[[["60 seconds","100","50","0.05","1000"],["random_population","roulette_wheel_selection","op_crossover","IRGIBNNM_mutation_XD","replace_old_gen!"],[[170567.0,{"value":0}],[165807.0,{"value":50}],[160537.0,{"value":308}],[159643.0,{"value":385}],[158276.0,{"value":2306}],[151493.0,{"value":3139}],[148068.0,{"value":10028}],[148068.0,{"value":60}]]]]}

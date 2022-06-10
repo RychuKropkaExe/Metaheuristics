@@ -1,0 +1,1 @@
+{"a280.tsp":[[["60 seconds","100","50","0.05","1000"],["random_population","roulette_wheel_selection","swap_crossover","swap_mutation!","replace_old_gen!"],[[30179.0,{"value":0}],[29930.0,{"value":3226}],[29365.0,{"value":6401}],[29365.0,{"value":60}]]]]}

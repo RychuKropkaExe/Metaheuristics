@@ -35,7 +35,7 @@ function genetic(config::Config, f::GeneticFunctions)
         if min_value < best
             best = min_value
             useless_generations = 0
-            println("Generation: ", generation, " Best: ", best, " Time: ", Dates.now() - start)
+            #println("Generation: ", generation, " Best: ", best, " Time: ", Dates.now() - start)
         else
             useless_generations += 1
         end
@@ -48,8 +48,8 @@ function genetic(config::Config, f::GeneticFunctions)
         end
         if useless_generations == config.max_stagnation
             useless_generations = 0
-            println("Stagnation prevention")
-            population[floor(Int,config.population_size/2)+1:config.population_size] = shuffle(elite)[1:floor(Int,config.population_size/2)] 
+            #println("Stagnation prevention")
+            population[ceil(Int,config.population_size/2)+1:config.population_size] = shuffle(elite)[1:floor(Int,config.population_size/2)] 
             for _ in 1:floor(Int,config.population_size/10)
                 shuffle!(population[rand(1:config.population_size)].path)
             end
@@ -180,34 +180,35 @@ function island_genetic(config::Config, f::GeneticFunctions)
 end
 
 function main()
-    dict = structToDict(readTSPLIB(:eil51))
+    dict = structToDict(readTSPLIB(:a280))
     initialize_dict(dict)
     println(destination(dict[:weights],kRandom(dict[:weights],dict[:dimension],100000)))
     println(destination(dict[:weights],twooptacc(kRandom(dict[:weights],dict[:dimension],10000),dict[:weights],dict[:nodes],false)))
     parameters::Config = Config(
         dict,
         Second(60),
-        52,
-        26,
+        100,
+        50,
         0.05,
-        5000
+        1000
     )
     functions::GeneticFunctions = GeneticFunctions(
         k_means_clustering,
-        tournament_selection,
+        roulette_wheel_selection,
         order_crossover,
-        reverse_mutation!,
+        swap_mutation!,
         select_tournament_next_gen
     )
     IF_functions::GeneticFunctions = GeneticFunctions(
-        random_population,
+        k_means_clustering,
         roulette_wheel_selection,
         op_crossover,
         swap_mutation!,
         replace_old_gen!
     )
     println(dict[:optimal])
-    island_genetic(parameters, functions) |> println
+    genetic(parameters, IF_functions) |> println
 end
+
 
 #main()

@@ -30,5 +30,5 @@ function select_top_next_gen!(population::Array{Chromosome}, n::Int)
 end
 
 function replace_old_gen!(population::Array{Chromosome}, n::Int)
-    return population[n+1:2*n]
+    return population[(1+length(population)-n):length(population)]
 end
