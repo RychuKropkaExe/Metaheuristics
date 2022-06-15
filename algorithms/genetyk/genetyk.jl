@@ -210,5 +210,4 @@ function main()
     genetic(parameters, IF_functions) |> println
 end
 
-
 #main()

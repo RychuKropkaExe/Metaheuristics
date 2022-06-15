@@ -57,6 +57,7 @@ function test_genetic(config::Config, f::GeneticFunctions)
     push!(history,[best,config.time])
     return history
 end
+
 function config_to_string(config::Config)
     conf = ["$(config.time)","$(config.population_size)","$(config.crossovers_count)","$(config.mutation_rate)","$(config.max_stagnation)"]
     return conf
@@ -67,7 +68,7 @@ function functions_to_string(func::GeneticFunctions)
     return gf
 end
 
-function badanie_GA(problem::String)
+function badanie_GA(problem::String, functions::GeneticFunctions)
     initial_population_opeators = [k_means_clustering,random_population]
     ips_length = length(initial_population_opeators)
     selection_operators = [random_selection,roulette_wheel_selection,tournament_selection,weighted_selection]
@@ -86,38 +87,37 @@ function badanie_GA(problem::String)
     dict = structToDict(readTSP("./algorithms/genetyk/Data/"*problem))
     initialize_dict(dict)
     dimension = dict[:dimension]
-    for i in 1:1
+    Threads.@threads for i in 1:16
         println("Iteration: $i t: $(Threads.threadid())")
         sample = []
         parameters::Config = Config(
             dict,
             Second(60),
-            100,
-            50,
-            0.05,
-            1000
+            rand(dimension:(dimension*dimension)),
+            rand(dimension:(dimension*dimension)/2),
+            rand(Float64)%0.05,
+            rand(1000:10000)
         )
-        IF_functions::GeneticFunctions = GeneticFunctions(
-        random_population,
-        roulette_wheel_selection,
-        op_crossover,
-        swap_mutation!,
-        select_tournament_next_gen
-    )
+    #     IF_functions::GeneticFunctions = GeneticFunctions(
+    #     k_means_clustering,
+    #     tournament_selection,
+    #     order_crossover,
+    #     reverse_mutation!,
+    #     select_tournament_next_gen
+    # )
         #println(config_to_string(parameters), " ", functions_to_string(functions), " $i")
         push!(sample,config_to_string(parameters))
-        push!(sample,functions_to_string(IF_functions))
-        push!(sample, test_genetic(parameters,IF_functions))
-        push!(results[problem],sample)
+        push!(sample,functions_to_string(functions))
+        push!(sample, test_genetic(parameters,functions))
+        lock(lk)
+            push!(results[problem],sample)
+        unlock(lk)
         println("ITERATION $i DONE")
     end
     return results
 end
-
-
-#problems = ["kroB100.tsp","kroA100.tsp","gr17.tsp","eil101.tsp","eil51.tsp","a280.tsp","lin105.tsp",
- #           "ry48p.atsp","p43.atsp","kro124p.atsp","ftv64.atsp","ftv44.atsp","ftv35.atsp","ftv33.atsp","br17.atsp"]
-problems =["ftv64.atsp","ftv44.atsp","ftv35.atsp","ftv33.atsp","br17.atsp"]
+problems = ["kroB100.tsp","kroA100.tsp","gr17.tsp","eil101.tsp","eil51.tsp","a280.tsp","lin105.tsp", "berlin52.tsp",
+           "ry48p.atsp","p43.atsp","br17.atsp"]
 lk = ReentrantLock()
 for problem in problems
     println("instancja: $problem")
@@ -133,14 +133,14 @@ for problem in problems
     )
     functions::GeneticFunctions = GeneticFunctions(
         random_population,
-        tournament_selection,
-        pm_crossover,
-        reverse_mutation!,
-        select_tournament_next_gen
+        weighted_selection,
+        order_crossover,
+        IRGIBNNM_mutation_XD,
+        select_top_next_gen!
     )
-    result = island_genetic(parameters,functions)
+    result = badanie_GA(problem,functions)
     lock(lk)
-        open("./algorithms/genetyk/jsonsMulti/MultiThreadResults"*problem, "w") do io
+        open("./algorithms/genetyk/jsonsPorównania2/Badanie"*problem, "w") do io
             JSON.print(io,result)
         end
     unlock(lk)

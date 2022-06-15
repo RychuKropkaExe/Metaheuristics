@@ -1,10 +1,37 @@
 include("plots.jl")
 using JSON
-
-
-
+using HypothesisTests
+using Pingouin
+using DataFrames
 
 function best_parametres()
+     for (root, dirs, files) in walkdir("./algorithms/genetyk/jsons")
+        for file in files
+            f = open("./algorithms/genetyk/jsons/"*file)
+            name = file[17:length(file)]
+            #name = file[28:length(file)]
+            df = JSON.parse(read(f,String))
+            best_par = []
+            best_result = Inf
+            for i in 1:length(df[name])
+                result = Inf
+                par = df[name][i][2]
+                for j in 1:length(df[name][i][3])
+                    if df[name][i][3][j][1] < result
+                        result = df[name][i][3][j][1]
+                    end
+                end
+                if result < best_result
+                    #println(result)
+                    best_par = par
+                    best_result = result
+                end
+            end
+            println(name)
+            println(best_par)
+            println(best_result)
+        end
+    end
 end
 
 function parametry_odniesienia()
@@ -168,20 +195,240 @@ function separator()
             end
         end
     end
-    println(populacja)
     return [populacja,selekcja,crossover,mutacja, next_gen]
 end
 
 function wykresy()
+    problems = ["kroB100.tsp","kroA100.tsp","gr17.tsp","eil101.tsp","eil51.tsp","a280.tsp","lin105.tsp", "berlin52.tsp",
+              "ry48p.atsp","p43.atsp","kro124p.atsp","ftv64.atsp","ftv44.atsp","ftv35.atsp","ftv33.atsp","br17.atsp"]
     dicts = separator()
     populacja = dicts[1]
     selekcja = dicts[2]
+    selekcja["random"] = selekcja[""]
+    pop!(selekcja,"")
     crossover = dicts[3]
+    mutacja = dicts[4]
+    next_gen = dicts[5]
     odniesienie = parametry_odniesienia()
-
+    testy_populacja = Dict{String,Array}()
+    testy_selekcja = Dict{String,Array}()
+    testy_crossover = Dict{String,Array}()
+    testy_mutacja = Dict{String,Array}()
+    testy_next_gen = Dict{String,Array}()
+    for problem in problems
+        operators = []
+        push!(operators,"odniesienie")
+        if !haskey(testy_populacja,"odniesienie")
+            testy_populacja["odniesienie"] = []
+        end
+        arrx = []
+        arry = []
+        push!(odniesienie[problem][1],60*1000)
+        push!(odniesienie[problem][2],minimum(odniesienie[problem][2]))
+        push!(testy_populacja["odniesienie"], minimum(odniesienie[problem][2])) 
+        push!(arry,odniesienie[problem][2])
+        push!(arrx,odniesienie[problem][1])
+        for (key,value) in populacja
+            if !haskey(testy_populacja,key)
+                testy_populacja[key] = []
+            end
+            push!(operators,key)
+            value[problem][1][length(value[problem][1])] = value[problem][1][length(value[problem][1])]*1000
+            push!(testy_populacja[key],minimum(value[problem][2]))
+            push!(arrx,value[problem][1])
+            push!(arry,value[problem][2])
+        end
+        #plotForAny(arrx,arry,"Operatory populacji: instancja $problem",operators,"Milliseconds","Value")
+    end
+    for problem in problems
+        operators = []
+        push!(operators,"odniesienie")
+        arrx = []
+        arry = []
+        if !haskey(testy_mutacja,"odniesienie")
+            testy_mutacja["odniesienie"] = []
+        end
+        # push!(odniesienie[problem][1],60*1000)
+        # push!(odniesienie[problem][2],minimum(odniesienie[problem][2]))
+        push!(arry,odniesienie[problem][2])
+        push!(arrx,odniesienie[problem][1])
+        push!(testy_mutacja["odniesienie"], minimum(odniesienie[problem][2])) 
+        for (key,value) in mutacja
+            if !haskey(testy_mutacja,key)
+                testy_mutacja[key] = []
+            end
+            push!(operators,key)
+            #value[problem][1][length(value[problem][1])] = value[problem][1][length(value[problem][1])]*1000
+            push!(value[problem][1],60000)
+            push!(value[problem][2],value[problem][2][length(value[problem][2])])
+            #println(value[problem][1])
+            push!(testy_mutacja[key],minimum(value[problem][2]))
+            push!(arrx,value[problem][1])
+            push!(arry,value[problem][2])
+            #exit(0)
+        end
+        #exit(0)
+        #plotForAny(arrx,arry,"Operatory mutacji: instancja $problem",operators,"Milliseconds","Value")
+        #exit(0)
+    end
+    for problem in problems
+        operators = []
+        push!(operators,"odniesienie")
+        arrx = []
+        arry = []
+        if !haskey(testy_crossover,"odniesienie")
+            testy_crossover["odniesienie"] = []
+        end
+        # push!(odniesienie[problem][1],60*1000)
+        # push!(odniesienie[problem][2],minimum(odniesienie[problem][2]))
+        push!(arry,odniesienie[problem][2])
+        push!(arrx,odniesienie[problem][1])
+        push!(testy_crossover["odniesienie"], minimum(odniesienie[problem][2]))
+        for (key,value) in crossover
+            if !haskey(testy_crossover,key)
+                testy_crossover[key] = []
+            end
+            push!(operators,key)
+            #value[problem][1][length(value[problem][1])] = value[problem][1][length(value[problem][1])]*1000
+            push!(value[problem][1],60000)
+            push!(value[problem][2],value[problem][2][length(value[problem][2])])
+            #println(value[problem][1])
+            push!(arrx,value[problem][1])
+            push!(arry,value[problem][2])
+            push!(testy_crossover[key],minimum(value[problem][2]))
+            #exit(0)
+        end
+        #exit(0)
+        #plotForAny(arrx,arry,"Operatory Krzyżowania: instancja $problem",operators,"Milliseconds","Value")
+        #exit(0)
+    end
+    for problem in problems
+        operators = []
+        push!(operators,"odniesienie")
+        arrx = []
+        arry = []
+        # push!(odniesienie[problem][1],60*1000)
+        # push!(odniesienie[problem][2],minimum(odniesienie[problem][2]))
+        push!(arry,odniesienie[problem][2])
+        push!(arrx,odniesienie[problem][1])
+        if !haskey(testy_selekcja,"odniesienie")
+            testy_selekcja["odniesienie"] = []
+        end
+        push!(testy_selekcja["odniesienie"], minimum(odniesienie[problem][2]))
+        for (key,value) in selekcja
+            if !haskey(testy_selekcja,key)
+                testy_selekcja[key] = []
+            end
+            push!(operators,key)
+            #value[problem][1][length(value[problem][1])] = value[problem][1][length(value[problem][1])]*1000
+            push!(value[problem][1],60000)
+            push!(value[problem][2],value[problem][2][length(value[problem][2])])
+            push!(arrx,value[problem][1])
+            push!(arry,value[problem][2])
+            push!(testy_selekcja[key],minimum(value[problem][2]))
+            #exit(0)
+        end
+        #exit(0)
+        #plotForAny(arrx,arry,"Operatory selekcji: instancja $problem",operators,"Milliseconds","Value")
+        #exit(0)
+    end
+    for problem in problems
+        operators = []
+        push!(operators,"odniesienie")
+        arrx = []
+        arry = []
+        # push!(odniesienie[problem][1],60*1000)
+        # push!(odniesienie[problem][2],minimum(odniesienie[problem][2]))
+        push!(arry,odniesienie[problem][2])
+        push!(arrx,odniesienie[problem][1])
+        if !haskey(testy_next_gen,"odniesienie")
+            testy_next_gen["odniesienie"] = []
+        end
+        push!(testy_next_gen["odniesienie"], minimum(odniesienie[problem][2]))
+        for (key,value) in next_gen
+            if !haskey(testy_next_gen,key)
+                testy_next_gen[key] = []
+            end
+            push!(operators,key)
+            #value[problem][1][length(value[problem][1])] = value[problem][1][length(value[problem][1])]*1000
+            push!(value[problem][1],60000)
+            push!(value[problem][2],value[problem][2][length(value[problem][2])])
+            push!(arrx,value[problem][1])
+            push!(arry,value[problem][2])
+            push!(testy_next_gen[key],minimum(value[problem][2]))
+            #exit(0)
+        end
+        #exit(0)
+        #plotForAny(arrx,arry,"Operatory selekcji: instancja $problem",operators,"Milliseconds","Value")
+        #exit(0)
+    end
+    #statistical_tests(testy_mutacja)
+    #statistical_tests(testy_selekcja)
+    #statistical_tests(testy_crossover)
+    #statistical_tests(testy_populacja)
+    statistical_tests(testy_next_gen)
+    #println(testy_selekcja)
+    # plotForAnyBars(problems,testy_populacja,"Testy wpływu operatorów generowania populacji","numer instancji", "Różnica w %")
+    #plotForAnyBars(problems,testy_selekcja,"Testy wpływu operatorów wyboru rodziców","numer instancji", "Różnica w %")
+    #plotForAnyBars(problems,testy_crossover,"Testy wpływu operatorów krzyżowania","numer instancji", "Różnica w %")
+    #plotForAnyBars(problems,testy_mutacja,"Testy wpływu operatorów mutowania","numer instancji", "Różnica w %")
+    plotForAnyBars(problems,testy_next_gen,"Testy wpływu operatorów selekcji następnej generacji","numer instancji", "Różnica w %")
+    #println(testy_next_gen)
+    exit(0)
 end
-function statistical_tests()
+
+function statistical_tests(dict::Dict)
+    len = 0
+    df = DataFrame()
+    keys = []
+    arrs::Array{Array{Float64,1}} = []
+    for (key,val) in dict
+        push!(keys,key)
+        push!(arrs,val)
+        println(key,val)
+        df[!,:($key)] = val
+    end
+    for i in 1:length(arrs)
+        for j in i+1:length(arrs)
+            println(keys[i])
+            println(keys[j])
+            #println()
+            println(SignedRankTest(arrs[i],arrs[j]))
+        end
+    end
+    #println(df)
+    #println(friedman(df,"Row","Desire","1","f"))
 end
 
 #parameters_impact()
-separator()
+#wykresy()
+function best_parametres_size()
+    for (root, dirs, files) in walkdir("./algorithms/genetyk/jsonsRozmiaru")
+       for file in files
+           f = open("./algorithms/genetyk/jsonsRozmiaru/"*file)
+           name = file[8:length(file)]
+           #name = file[28:length(file)]
+           df = JSON.parse(read(f,String))
+           best_par = []
+           best_result = Inf
+           for i in 1:length(df[name])
+               result = Inf
+               par = df[name][i][1]
+               for j in 1:length(df[name][i][3])
+                   if df[name][i][3][j][1] < result
+                       result = df[name][i][3][j][1]
+                   end
+               end
+               if result < best_result
+                   #println(result)
+                   best_par = par
+                   best_result = result
+               end
+           end
+           println(name)
+           println(best_par)
+           println(best_result)
+       end
+   end
+end
+best_parametres_size()
