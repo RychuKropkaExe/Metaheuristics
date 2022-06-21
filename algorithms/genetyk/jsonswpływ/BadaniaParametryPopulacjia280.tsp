@@ -1,0 +1,1 @@
+{"a280.tsp":[[["60 seconds","100","50","0.05","1000"],["k_means_clustering","roulette_wheel_selection","op_crossover","swap_mutation!","replace_old_gen!"],[[16402.0,{"value":0}],[16402.0,{"value":60}]]]]}

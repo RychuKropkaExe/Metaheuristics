@@ -1,0 +1,1 @@
+{"br17.atsp":[[["60 seconds","100","50","0.05","1000"],["k_means_clustering","roulette_wheel_selection","op_crossover","swap_mutation!","replace_old_gen!"],[[159.0,{"value":0}],[74.0,{"value":1}],[73.0,{"value":4}],[67.0,{"value":4}],[65.0,{"value":6}],[54.0,{"value":8}],[49.0,{"value":10}],[42.0,{"value":17}],[40.0,{"value":23}],[39.0,{"value":165}],[39.0,{"value":60}]]]]}

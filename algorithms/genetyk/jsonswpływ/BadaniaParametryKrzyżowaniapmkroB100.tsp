@@ -1,0 +1,1 @@
+{"kroB100.tsp":[[["60 seconds","100","50","0.05","1000"],["random_population","roulette_wheel_selection","pm_crossover","swap_mutation!","replace_old_gen!"],[[143194.0,{"value":0}],[141110.0,{"value":1780}],[140645.0,{"value":1874}],[138834.0,{"value":2205}],[136989.0,{"value":4330}],[136279.0,{"value":15235}],[135459.0,{"value":28164}],[135459.0,{"value":60}]]]]}

@@ -1,0 +1,1 @@
+{"lin105.tsp":[[["60 seconds","100","50","0.05","1000"],["random_population","roulette_wheel_selection","op_crossover","reverse_mutation!","replace_old_gen!"],[[104307.0,{"value":0}],[102881.0,{"value":5691}],[102880.0,{"value":5725}],[100069.0,{"value":10265}],[96523.0,{"value":31444}],[95729.0,{"value":34772}],[94655.0,{"value":35819}],[94655.0,{"value":60}]]]]}

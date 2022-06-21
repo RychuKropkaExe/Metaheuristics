@@ -1,0 +1,1 @@
+{"eil51.tsp":[[["60 seconds","100","50","0.05","1000"],["random_population","random_selection","op_crossover","swap_mutation!","replace_old_gen!"],[[1376.0,{"value":0}],[1270.0,{"value":1483}],[1266.0,{"value":1793}],[1230.0,{"value":2350}],[1217.0,{"value":7025}],[1213.0,{"value":43936}],[1182.0,{"value":57816}],[1182.0,{"value":60}]]]]}

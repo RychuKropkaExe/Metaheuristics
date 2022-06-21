@@ -1,0 +1,1 @@
+{"eil101.tsp":[[["60 seconds","100","50","0.05","1000"],["k_means_clustering","roulette_wheel_selection","op_crossover","swap_mutation!","replace_old_gen!"],[[2389.0,{"value":0}],[2387.0,{"value":31840}],[2355.0,{"value":31962}],[2341.0,{"value":44637}],[2280.0,{"value":44728}],[2280.0,{"value":60}]]]]}

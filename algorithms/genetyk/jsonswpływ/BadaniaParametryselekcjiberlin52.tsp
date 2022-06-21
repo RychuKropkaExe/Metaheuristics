@@ -1,0 +1,1 @@
+{"berlin52.tsp":[[["60 seconds","100","50","0.05","1000"],["random_population","random_selection","op_crossover","swap_mutation!","replace_old_gen!"],[[25665.0,{"value":0}],[23773.0,{"value":2}],[23358.0,{"value":193}],[23339.0,{"value":740}],[22268.0,{"value":741}],[21843.0,{"value":3969}],[21022.0,{"value":4009}],[21022.0,{"value":60}]]]]}
