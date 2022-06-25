@@ -1,6 +1,6 @@
 # Metaheuristics
 
-Implementacja algorytmów i heurtystyk do rozwiązywania :
+Implementacja algorytmów i heurtystyk do rozwiązywania problemu TSP :
 -K random
 -Nearest neighbour
 -2 opt
